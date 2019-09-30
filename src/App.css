@@ -1,22 +1,32 @@
 .App {
-  text-align: center;
+    align-items: center;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    width: 100%;
 }
-
-.App-logo {
-  height: 40vmin;
+.Header-Arrow {
+    height: 20px;
+    margin-bottom: -10px;
+    margin-top: 10px;
+    width: 20px;
+    transform: rotate(45deg);
+    background-color: #2c3e50; 
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.Box{
+    align-items: center;
+    background-color: #2c3e50; 
+    border-radius: 5px;
+    color: white;
+    display: flex;
+    height: 300px;
+    justify-content: center;
+    padding: 20px;
+    width: 100%;
 }
-
-.App-link {
-  color: #09d3ac;
+.Box p{
+    font-size: small;
+    text-align: center;
 }
