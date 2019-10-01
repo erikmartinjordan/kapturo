@@ -2,14 +2,12 @@ const electron = require('electron');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const nativeImage = electron.nativeImage;
-const ipcMain = electron.ipcMain;
 const Tray = electron.Tray;
 const globalShortcut = electron.globalShortcut;
 
 const path = require('path');
 const url = require('url');
 var shell = require('shelljs');
-
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -52,10 +50,10 @@ const createWindow = () => {
         transparent: true,
         titleBarStyle: 'customButtonsOnHover',
         show: false,
-        width: 300, 
-        height: 350,
+        width: 600, 
+        height: 600,
         webPreferences: {
-            nodeIntegration: false,
+            nodeIntegration: true,
             preload: __dirname + '/preload.js'
         }
     });
@@ -73,7 +71,7 @@ const createWindow = () => {
     setPosition();
     
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     
     // Blur window when close o loses focus
     mainWindow.on('blur', () => mainWindow.hide() );
@@ -85,6 +83,8 @@ const createWindow = () => {
         // when you should delete the corresponding element.
         mainWindow = null
     })
+    
+    // mainWindow.webContents.on('did-finish-load', () => mainWindow.webContents.send('ping', '¡Suuuuuuuuuuuuuu!'));
 }
 
 const setPosition = () => {
@@ -120,10 +120,12 @@ app.on('ready', () => {
     
     // Capture keyboard events
     const ret = globalShortcut.register('Command+Shift+4', () => {
-        shell.exec("screencapture electron_pic.jpg", function(){
+        shell.exec("screencapture electron_pic.png", () => {
+                        
+            let image = nativeImage.createFromPath('electron_pic.png').toPNG();
             
-            var storageRef = firebase.storage().ref();
-            storageRef.child('acerca/' + file.name).put('electron_pic.jpg').then( snapshot => console.log('Ok') );
+            mainWindow.webContents.send('ping', image);
+            
         });
     });
     

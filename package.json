@@ -4,6 +4,9 @@
   "private": true,
   "homepage": "./",
   "dependencies": {
+    "firebase": "^7.0.0",
+    "grpc": "^1.24.0",
+    "npm": "^6.11.3",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-scripts": "3.1.2",
