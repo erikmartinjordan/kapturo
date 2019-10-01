@@ -50,8 +50,8 @@ const createWindow = () => {
         transparent: true,
         titleBarStyle: 'customButtonsOnHover',
         show: false,
-        width: 600, 
-        height: 600,
+        width: 300, 
+        height: 300,
         webPreferences: {
             nodeIntegration: true,
             preload: __dirname + '/preload.js'
@@ -71,7 +71,7 @@ const createWindow = () => {
     setPosition();
     
     // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
     
     // Blur window when close o loses focus
     mainWindow.on('blur', () => mainWindow.hide() );
@@ -84,7 +84,6 @@ const createWindow = () => {
         mainWindow = null
     })
     
-    // mainWindow.webContents.on('did-finish-load', () => mainWindow.webContents.send('ping', '¡Suuuuuuuuuuuuuu!'));
 }
 
 const setPosition = () => {

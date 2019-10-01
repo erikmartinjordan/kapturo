@@ -4,6 +4,7 @@
 body {
     background: transparent;
     border-radius: 5px;
+    color: #9ba1a6;
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -12,4 +13,18 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
+}
+kbd{
+    display: inline-block;
+    margin: 0 .1em;
+    padding: .1em .6em;
+    font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    text-shadow: 0 1px 0 #FFF;
+    background-color: #f6f7f8;
+    border: 1px solid #adb3b9;
+    border-radius: 3px;
+    box-shadow: 0 1px 0 rgba(12,13,14,0.2), 0 0 0 2px #FFF inset;
+    white-space: nowrap;
 }

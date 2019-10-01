@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import mainLogo from'./mainLogo.png';
 import firebase from 'firebase';
 import './App.css';
 
@@ -18,7 +19,9 @@ firebase.initializeApp(config);
 function App() {
     
     const [imgURL, setImgURL] = useState(null);
-    
+    const [status, setStatus] = useState('Green');
+    const [statusMessage, setStatusMessage] = useState('Ready to capture') 
+        
     useEffect( () => {
         
         window.ipcRenderer.on('ping', (event, message) => { 
@@ -31,18 +34,26 @@ function App() {
                 // Observe state change events such as progress, pause, and resume
                 // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
                 var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
+                
+                setStatus('Yellow');
+                
                 switch (snapshot.state) {
                     case firebase.storage.TaskState.PAUSED: // or 'paused'
-                    console.log('Upload is paused');
+                    setStatusMessage('Upload is paused');
                     break;
                     case firebase.storage.TaskState.RUNNING: // or 'running'
-                    console.log('Upload is running');
+                    setStatusMessage('Upload is running: ' + Math.round(progress) + '% done');
                     break;
                 }
             }, (error) => {
-            // Handle unsuccessful uploads
-            }, () => {task.snapshot.ref.getDownloadURL().then( downloadURL => setImgURL(downloadURL) );
+                // Handle unsuccessful uploads
+                setStatus('Red');
+                setStatusMessage('There was an error. Please, try it again.');
+            }, () => {
+                
+                task.snapshot.ref.getDownloadURL().then( downloadURL => setImgURL(downloadURL) );
+                setStatus('Green');
+                setStatusMessage('Ready to capture');
             });
         });    
         
@@ -51,11 +62,23 @@ function App() {
     return (
     <div className = 'App'>
         <div className = 'Header-Arrow'></div>
+        <div className = 'Header'>
+            <div className = 'Title'>Kaptura</div>
+        </div>
         <div className = 'Box'>
         { imgURL 
-            ? <img src = {imgURL}></img>
-            : <p>Press <kbd>⌘</kbd> + ⇧ + 4</p>
+            ? <div className = 'Completed'>
+                <img src = {imgURL}></img>
+              </div>
+            : <div className = 'Waiting'>
+                <img src = {mainLogo}></img>
+                <p>Press <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>4</kbd></p>
+             </div>
         }
+        </div>
+        <div className = 'Footer'>
+            <div className = {'Color ' + status}></div>
+            <p>{statusMessage}</p>
         </div>
     </div>
     );
