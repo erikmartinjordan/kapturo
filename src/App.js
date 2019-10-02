@@ -18,17 +18,26 @@ firebase.initializeApp(config);
 
 function App() {
     
+    const [imgName, setImgName] = useState(null);
     const [imgURL, setImgURL] = useState(null);
     const [status, setStatus] = useState('Green');
-    const [statusMessage, setStatusMessage] = useState('Ready to capture') 
+    const [statusMessage, setStatusMessage] = useState('Ready to capture'); 
         
     useEffect( () => {
         
+        // Waiting until user make screencapture
         window.ipcRenderer.on('ping', (event, message) => { 
+         
+            // Getting the image
+            var blob = new Blob([message[0]], {type: 'img/png'});
+            
+            // Getting the machine id
+            var uid = message[1];
+            
+            // Getting timeStamp
+            var timeStamp = Date.now();
                         
-            var blob = new Blob([message], {type: 'img/png'});
-                
-            var task = firebase.storage().ref().child('/captures/img.png').put(blob);
+            var task = firebase.storage().ref().child(uid + '/' + timeStamp + '.png').put(blob);
             
             task.on('state_changed', (snapshot) => {
                 // Observe state change events such as progress, pause, and resume
@@ -46,14 +55,29 @@ function App() {
                     break;
                 }
             }, (error) => {
+                
                 // Handle unsuccessful uploads
                 setStatus('Red');
                 setStatusMessage('There was an error. Please, try it again.');
             }, () => {
                 
-                task.snapshot.ref.getDownloadURL().then( downloadURL => setImgURL(downloadURL) );
-                setStatus('Green');
-                setStatusMessage('Ready to capture');
+                task.snapshot.ref.getDownloadURL().then( downloadURL => {
+                    
+                    // Setting status of variables
+                    setStatus('Green');
+                    setStatusMessage('Ready to capture (⌘ + ⇧ + 4)');
+                    setImgName('kapture' + timeStamp + '.png');
+                    setImgURL(downloadURL); 
+                    
+                    // Writing uRL in clipboard
+                    window.clipboard.writeText(downloadURL);
+                    
+                    // Sending notification
+                    new Notification('Copy to clipboard', {
+                        body: 'URL was copied to clipboard' 
+                    });
+                });
+
             });
         });    
         
@@ -69,6 +93,10 @@ function App() {
         { imgURL 
             ? <div className = 'Completed'>
                 <img src = {imgURL}></img>
+                <div className = 'Title-Description'>
+                    <div className = 'Title'>{imgName}</div>
+                    <div className = 'Description'>{imgURL}</div>
+                </div>
               </div>
             : <div className = 'Waiting'>
                 <img src = {mainLogo}></img>

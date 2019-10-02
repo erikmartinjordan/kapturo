@@ -10,8 +10,7 @@
 .Header,
 .Footer{
     align-items: center;
-    background: #f6f7f8;
-    border-bottom: 1px solid #c5c9ce;
+    background: var(--bgSecondaryColor);
     border-radius: 5px 5px 0px 0px;
     display: flex; 
     height: 30px;
@@ -24,7 +23,6 @@
 .Footer{
     border-bottom: 0px;
     border-radius: 0px 0px 5px 5px;
-    border-top: 1px solid #c5c9ce;
 }
 .Header-Arrow {
     background-color: #f6f7f8;
@@ -54,10 +52,33 @@
     height: 60px;
     width: 60px;
 }
+.Box .Completed{
+    display: flex;
+    width: 100%;
+}
+.Box .Completed .Title-Description{
+    display: flex;
+    flex-direction: column; 
+    overflow: hidden;
+    width: 100%;
+}
+.Box .Completed .Title{
+    font-size: small; 
+    width: 100%;
+}
+.Box .Completed .Description{
+    color: var(--secondaryFontColor);
+    font-size: x-small;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; 
+}
 .Box .Completed img{
     border-radius: 5px;
-    height: 80px;
-    width: 80px;
+    height: 30px;
+    margin-right: 5px;
+    width: 30px;
 }
 .Box p{
     font-size: small;

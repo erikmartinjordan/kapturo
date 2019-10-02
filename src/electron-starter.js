@@ -1,9 +1,11 @@
+const nodeMachineId = require('node-machine-id');
 const electron = require('electron');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const nativeImage = electron.nativeImage;
 const Tray = electron.Tray;
 const globalShortcut = electron.globalShortcut;
+const machineIdSync = nodeMachineId.machineIdSync;
 
 const path = require('path');
 const url = require('url');
@@ -71,7 +73,7 @@ const createWindow = () => {
     setPosition();
     
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     
     // Blur window when close o loses focus
     mainWindow.on('blur', () => mainWindow.hide() );
@@ -106,27 +108,45 @@ const setPosition = () => {
 }
 
 // Don't show app in the dock
-app.dock.hide();
+// app.dock.hide();
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => { 
     
+    // Getting machine id
+    let uid = machineIdSync();
+    
     // Initialising tray and window
     createTray(); 
     createWindow(); 
     
     // Capture keyboard events
-    const ret = globalShortcut.register('Command+Shift+4', () => {
+    // ⌘ + ⇧ + 3 is a normal screenshot
+    const combOne = globalShortcut.register('Command+Shift+3', () => {
         shell.exec("screencapture electron_pic.png", () => {
                         
             let image = nativeImage.createFromPath('electron_pic.png').toPNG();
             
-            mainWindow.webContents.send('ping', image);
+            // Sending image and machine id
+            mainWindow.webContents.send('ping', [image, uid]);
             
         });
     });
+    
+    // Capture keyboard events
+    // ⌘ + ⇧ + 4 is a selective screenshot
+    const combTwo = globalShortcut.register('Command+Shift+4', () => {
+        shell.exec("screencapture -i electron_pic.png", () => {
+                        
+            let image = nativeImage.createFromPath('electron_pic.png').toPNG();
+            
+            // Sending image and machine id
+            mainWindow.webContents.send('ping', [image, uid]);
+            
+        });
+    }); 
     
 });
 
