@@ -18,6 +18,7 @@ firebase.initializeApp(config);
 
 function App() {
     
+    const [items, setItems] = useState([]);
     const [imgName, setImgName] = useState(null);
     const [imgURL, setImgURL] = useState(null);
     const [status, setStatus] = useState('Green');
@@ -29,17 +30,18 @@ function App() {
         window.ipcRenderer.on('ping', (event, message) => { 
          
             // Getting the image
-            var blob = new Blob([message[0]], {type: 'img/png'});
+            var blob = new Blob([message[0]], {type: 'image/png'});
             
             // Getting the machine id
             var uid = message[1];
             
             // Getting timeStamp
             var timeStamp = Date.now();
-                        
+             
+            // Uploading the image to firebase
             var task = firebase.storage().ref().child(uid + '/' + timeStamp + '.png').put(blob);
             
-            task.on('state_changed', (snapshot) => {
+            task.on('state_changed', snapshot => {
                 // Observe state change events such as progress, pause, and resume
                 // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
                 var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -54,18 +56,19 @@ function App() {
                     setStatusMessage('Upload is running: ' + Math.round(progress) + '% done');
                     break;
                 }
-            }, (error) => {
+            }, error => {
                 
                 // Handle unsuccessful uploads
                 setStatus('Red');
                 setStatusMessage('There was an error. Please, try it again.');
+                
             }, () => {
                 
                 task.snapshot.ref.getDownloadURL().then( downloadURL => {
                     
                     // Setting status of variables
                     setStatus('Green');
-                    setStatusMessage('Ready to capture (⌘ + ⇧ + 4)');
+                    setStatusMessage('Ready to capture: press (⌘ + ⇧ + 3) or (⌘ + ⇧ + 4)');
                     setImgName('kapture' + timeStamp + '.png');
                     setImgURL(downloadURL); 
                     
@@ -75,6 +78,50 @@ function App() {
                     // Sending notification
                     new Notification('Copy to clipboard', {
                         body: 'URL was copied to clipboard' 
+                    });
+                    
+                    // Getting old captures if there are any
+                    var images = firebase.storage().ref().child(uid);
+            
+                    // Getting the references of these images
+                    images.listAll().then( result => { 
+                        
+                        // It's important to declare this variable before map function
+                        // If declared inside map, the state will break
+                        let state = [];
+                        
+                        if(result){
+                            // Getting the URL for each reference and
+                            // Creating an array with title of the image and the URL    
+                            result.items.map( reference => {
+                                
+                                
+                                // Getting title
+                                let title = reference.name;
+                                
+                                // Getting downloadURL
+                                reference.getDownloadURL().then( downloadURL => {
+                                    
+                                    // This is the new object containing title and url
+                                    let object = {title: title, url: downloadURL};
+                                    
+                                    // Appending the new array to the old state
+                                    state = [...state, object];
+                                    
+                                    // Setting the new state
+                                    setItems(state);
+                                    
+                                });
+                                
+                                
+                            });
+                            
+                        }
+                        
+                    }).catch( error => {
+                      // Handle any errors
+                      setStatus('Red');
+                      setStatusMessage('There was an error. Please, try it again.');
                     });
                 });
 
@@ -87,21 +134,28 @@ function App() {
     <div className = 'App'>
         <div className = 'Header-Arrow'></div>
         <div className = 'Header'>
-            <div className = 'Title'>Kaptura</div>
+            <div  className = 'Title'>Kaptura</div>
         </div>
         <div className = 'Box'>
-        { imgURL 
-            ? <div className = 'Completed'>
-                <img src = {imgURL}></img>
-                <div className = 'Title-Description'>
-                    <div className = 'Title'>{imgName}</div>
-                    <div className = 'Description'>{imgURL}</div>
-                </div>
-              </div>
-            : <div className = 'Waiting'>
-                <img src = {mainLogo}></img>
-                <p>Press <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>4</kbd></p>
-             </div>
+        { !imgURL 
+        ? <div className = 'Waiting'>
+            <img src = {mainLogo}></img>
+            <p>Press</p>
+            <p><kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>3</kbd></p>
+            <p>or</p>
+            <p><kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>4</kbd></p>
+          </div>
+        : <div className = 'Completed'>
+            { items && items.map( (item, key) => 
+                <div className = 'File' key = {key}>
+                    <img src = {item.url}></img>
+                    <div className = 'Title-Description'>
+                        <div className = 'Title'>{item.title}</div>
+                        <div className = 'Description'>{item.url}</div>
+                    </div>   
+                </div>)
+            }
+          </div>
         }
         </div>
         <div className = 'Footer'>

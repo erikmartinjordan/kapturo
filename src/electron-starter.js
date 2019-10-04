@@ -15,6 +15,9 @@ var shell = require('shelljs');
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
+// Getting machine id
+let uid = machineIdSync();
+
 const createTray = () => {
         
     // Base 64 icon
@@ -114,9 +117,6 @@ const setPosition = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => { 
-    
-    // Getting machine id
-    let uid = machineIdSync();
     
     // Initialising tray and window
     createTray(); 

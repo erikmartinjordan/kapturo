@@ -23,6 +23,7 @@
 .Footer{
     border-bottom: 0px;
     border-radius: 0px 0px 5px 5px;
+    font-size: x-small;
 }
 .Header-Arrow {
     background-color: #f6f7f8;
@@ -34,10 +35,9 @@
     transform: rotate(45deg);
 }
 .Box{
-    align-items: center;
     background-color: white; 
     display: flex;
-    height: 200px;
+    height: 220px;
     justify-content: center;
     padding: 20px;
     width: 100%;
@@ -54,6 +54,8 @@
 }
 .Box .Completed{
     display: flex;
+    flex-direction: column;
+    overflow-y: auto;
     width: 100%;
 }
 .Box .Completed .Title-Description{
@@ -80,8 +82,13 @@
     margin-right: 5px;
     width: 30px;
 }
+.Box .Completed .File{
+    display: flex;
+    margin-bottom: 20px;
+}
 .Box p{
     font-size: small;
+    margin: 3px;
     text-align: center;
 }
 .Color{
