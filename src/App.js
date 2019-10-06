@@ -15,7 +15,6 @@ var config = {
 
 firebase.initializeApp(config);
 
-
 function App() {
     
     const [items, setItems] = useState([]);
@@ -25,7 +24,7 @@ function App() {
     const [statusMessage, setStatusMessage] = useState('Ready to capture'); 
         
     useEffect( () => {
-        
+            
         // Waiting until user make screencapture
         window.ipcRenderer.on('ping', (event, message) => { 
          
@@ -70,19 +69,20 @@ function App() {
                     setStatus('Green');
                     setStatusMessage('Ready to capture: press (⌘ + ⇧ + 3) or (⌘ + ⇧ + 4)');
                     setImgName('kapture' + timeStamp + '.png');
-                    setImgURL(downloadURL); 
+                    setImgURL('ok'); 
                     
+                    // Shorten URL and    
                     // Writing uRL in clipboard
-                    window.clipboard.writeText(downloadURL);
+                    shortenURL(downloadURL).then( shortURL => window.clipboard.writeText(shortURL) );
                     
                     // Sending notification
                     new Notification('Copy to clipboard', {
                         body: 'URL was copied to clipboard' 
                     });
-                    
+                        
                     // Getting old captures if there are any
                     var images = firebase.storage().ref().child(uid);
-            
+                        
                     // Getting the references of these images
                     images.listAll().then( result => { 
                         
@@ -95,15 +95,14 @@ function App() {
                             // Creating an array with title of the image and the URL    
                             result.items.map( reference => {
                                 
-                                
                                 // Getting title
                                 let title = reference.name;
                                 
                                 // Getting downloadURL
-                                reference.getDownloadURL().then( downloadURL => {
+                                reference.getDownloadURL().then( downloadURL => shortenURL(downloadURL) ).then(shortURL => {
                                     
                                     // This is the new object containing title and url
-                                    let object = {title: title, url: downloadURL};
+                                    let object = {title: title, url: shortURL};
                                     
                                     // Appending the new array to the old state
                                     state = [...state, object];
@@ -112,8 +111,7 @@ function App() {
                                     setItems(state);
                                     
                                 });
-                                
-                                
+                                  
                             });
                             
                         }
@@ -124,12 +122,36 @@ function App() {
                       setStatusMessage('There was an error. Please, try it again.');
                     });
                 });
-
+                
             });
         });    
         
     }, []);
-            
+    
+    const shortenURL = async (longURL) => {
+        
+        let url = 'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyB1caNJEEBjbz944Rlf9hZMTyyH5GHypLU';
+        
+        let longDynamicLink = 'https://kaptura.page.link/?link=' + encodeURIComponent(longURL);
+        
+        console.log(longURL);
+        console.log(encodeURIComponent(longURL));
+        console.log(longDynamicLink);
+        
+        let response = await fetch(url, {
+          "method": "POST",
+          "headers": {
+            "content-type": "application/json"
+          },
+          "body": JSON.stringify({"longDynamicLink": longDynamicLink})
+        });
+        
+        let data = await response.json();
+        
+        return data.shortLink;
+        
+    }
+        
     return (
     <div className = 'App'>
         <div className = 'Header-Arrow'></div>
