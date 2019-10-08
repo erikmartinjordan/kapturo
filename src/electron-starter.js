@@ -58,6 +58,7 @@ const createWindow = () => {
         width: 300, 
         height: 300,
         webPreferences: {
+            webSecurity: false,
             nodeIntegration: true,
             preload: __dirname + '/preload.js'
         }
@@ -125,9 +126,13 @@ app.on('ready', () => {
     // Capture keyboard events
     // ⌘ + ⇧ + 3 is a normal screenshot
     const combOne = globalShortcut.register('Command+Shift+3', () => {
-        shell.exec("screencapture electron_pic.png", () => {
+        
+        const userDataPath = app.getPath('userData');
+        const formatedPath = userDataPath.replace(" ", "' '");
+                
+        shell.exec("screencapture " + formatedPath + "/electron_pic.png", () => {
                         
-            let image = nativeImage.createFromPath('electron_pic.png').toPNG();
+            let image = nativeImage.createFromPath(userDataPath + "/electron_pic.png").toPNG();
             
             // Sending image and machine id
             mainWindow.webContents.send('ping', [image, uid]);
@@ -138,9 +143,13 @@ app.on('ready', () => {
     // Capture keyboard events
     // ⌘ + ⇧ + 4 is a selective screenshot
     const combTwo = globalShortcut.register('Command+Shift+4', () => {
-        shell.exec("screencapture -i electron_pic.png", () => {
+        
+        const userDataPath = app.getPath('userData');
+        const formatedPath = userDataPath.replace(" ", "' '");
+                
+        shell.exec("screencapture -i" + formatedPath + "/electron_pic.png", () => {
                         
-            let image = nativeImage.createFromPath('electron_pic.png').toPNG();
+            let image = nativeImage.createFromPath(userDataPath + "/electron_pic.png").toPNG();
             
             // Sending image and machine id
             mainWindow.webContents.send('ping', [image, uid]);
