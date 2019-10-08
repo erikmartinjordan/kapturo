@@ -134,10 +134,6 @@ function App() {
         
         let longDynamicLink = 'https://kaptura.page.link/?link=' + encodeURIComponent(longURL);
         
-        console.log(longURL);
-        console.log(encodeURIComponent(longURL));
-        console.log(longDynamicLink);
-        
         let response = await fetch(url, {
           "method": "POST",
           "headers": {
