@@ -147,7 +147,7 @@ app.on('ready', () => {
         const userDataPath = app.getPath('userData');
         const formatedPath = userDataPath.replace(" ", "' '");
                 
-        shell.exec("screencapture -i" + formatedPath + "/electron_pic.png", () => {
+        shell.exec("screencapture -i " + formatedPath + "/electron_pic.png", () => {
                         
             let image = nativeImage.createFromPath(userDataPath + "/electron_pic.png").toPNG();
             

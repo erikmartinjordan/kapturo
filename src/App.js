@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import mainLogo from'./mainLogo.png';
+import ReactTimeAgo from 'react-time-ago';
+import JavascriptTimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
+import mainLogo from './mainLogo.png';
 import firebase from 'firebase';
 import './App.css';
+
+// Initialize the desired locales.
+JavascriptTimeAgo.locale(en);
 
 var config = {
     apiKey: "AIzaSyB1caNJEEBjbz944Rlf9hZMTyyH5GHypLU",
@@ -76,8 +82,8 @@ function App() {
                     shortenURL(downloadURL).then( shortURL => window.clipboard.writeText(shortURL) );
                     
                     // Sending notification
-                    new Notification('Copy to clipboard', {
-                        body: 'URL was copied to clipboard' 
+                    new Notification('Woof-woof!', {
+                        body: 'Screencapture URL was copied to your clipboard' 
                     });
                         
                     // Getting old captures if there are any
@@ -92,11 +98,12 @@ function App() {
                         
                         if(result){
                             // Getting the URL for each reference and
-                            // Creating an array with title of the image and the URL    
-                            result.items.map( reference => {
+                            // Creating an array with title of the image and the URL 
+                            // Only last 5 captures are displayed
+                            result.items.reverse().slice(0, 5).map( reference => {
                                 
                                 // Getting title
-                                let title = reference.name;
+                                let title = parseInt( (reference.name).slice(0, -4) );
                                 
                                 // Getting downloadURL
                                 reference.getDownloadURL().then( downloadURL => shortenURL(downloadURL) ).then(shortURL => {
@@ -106,6 +113,9 @@ function App() {
                                     
                                     // Appending the new array to the old state
                                     state = [...state, object];
+                                    
+                                    // Sorting the array
+                                    state = state.sort( (a, b) => (a.title > b.title) ? -1 : 1 );
                                     
                                     // Setting the new state
                                     setItems(state);
@@ -168,7 +178,7 @@ function App() {
                 <div className = 'File' key = {key}>
                     <img src = {item.url}></img>
                     <div className = 'Title-Description'>
-                        <div className = 'Title'>{item.title}</div>
+                        <div className = 'Title'><ReactTimeAgo date = {item.title}/></div>
                         <div className = 'Description'>{item.url}</div>
                     </div>   
                 </div>)
