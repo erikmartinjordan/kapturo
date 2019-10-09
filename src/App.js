@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import ReactTimeAgo from 'react-time-ago';
-import JavascriptTimeAgo from 'javascript-time-ago';
-import en from 'javascript-time-ago/locale/en';
-import mainLogo from './mainLogo.png';
-import firebase from 'firebase';
+import React, { useEffect, useState }   from 'react';
+import Loading                          from './Loading';
+import ReactTimeAgo                     from 'react-time-ago';
+import JavascriptTimeAgo                from 'javascript-time-ago';
+import en                               from 'javascript-time-ago/locale/en';
+import mainLogo                         from './mainLogo.png';
+import firebase                         from 'firebase';
 import './App.css';
 
 // Initialize the desired locales.
@@ -25,7 +26,7 @@ function App() {
     
     const [items, setItems] = useState([]);
     const [imgName, setImgName] = useState(null);
-    const [ready, setReady] = useState(null);
+    const [showScreenshots, setShowScreenshots] = useState(null);
     const [status, setStatus] = useState('Green');
     const [statusMessage, setStatusMessage] = useState('Ready to capture');
     const [userID, setUserID] = useState(null);
@@ -43,15 +44,13 @@ function App() {
             
         });
             
-    
-        
     }, []);
     
     const uploadCapture = (pic, uid) => {
         
         // Getting the image
-        var blob = new Blob(pic, {type: 'image/png'});
-
+        var blob = new Blob([pic], {type: 'image/png'});
+        
         // Getting timeStamp
         var timeStamp = Date.now();
 
@@ -87,7 +86,6 @@ function App() {
                 setStatus('Green');
                 setStatusMessage('Ready to capture: press (⌘ + ⇧ + 3) or (⌘ + ⇧ + 4)');
                 setImgName('kapture' + timeStamp + '.png');
-                setReady('ok'); 
 
                 // Shorten URL and    
                 // Writing uRL in clipboard
@@ -107,57 +105,50 @@ function App() {
         
     }
     
-    const displayCaptures = (uid) => {
+    const displayCaptures = async (uid) => {
         
-        // Getting old captures if there are any
-        var images = firebase.storage().ref().child(uid);
+         // First state: loading
+        setShowScreenshots('Loading');
         
-        // Getting the references of these images
-        images.listAll().then( result => { 
+        // Getting the folder 
+        let folder = firebase.storage().ref().child(uid);
+        
+        // Getting all the images
+        let images = await folder.listAll();
+            
+        if(images){
             
             // It's important to declare this variable before map function
             // If declared inside map, the state will break
             let state = [];
             
-            if(result){
-                // Getting the URL for each reference and
-                // Creating an array with title of the image and the URL 
-                // Only last 5 captures are displayed
-                result.items.reverse().slice(0, 5).map( reference => {
-                    
-                    // Getting title
-                    let title = parseInt( (reference.name).slice(0, -4) );
-                    
-                    // Getting downloadURL
-                    reference.getDownloadURL().then( downloadURL => shortenURL(downloadURL) ).then(shortURL => {
-                        
-                        // This is the new object containing title and url
-                        let object = {title: title, url: shortURL};
-                        
-                        // Appending the new array to the old state
-                        state = [...state, object];
-                        
-                        // Sorting the array
-                        state = state.sort( (a, b) => (a.title > b.title) ? -1 : 1 );
-                        
-                        // Setting the new state
-                        setItems(state);
-                        
-                    });
-                    
-                });
+            // Getting the URL for each reference and
+            // Creating an array with title of the image and the URL 
+            // Only last 5 captures are displayed
+            await Promise.all(images.items.reverse().slice(0, 5).map( async (image, key) => {
+               
+                // Getting title
+                let title = parseInt( (image.name).slice(0, -4) );
                 
-                // Ready to display old captures
-                setReady('ok');
+                // Getting downloadURL
+                let dwnldURL = await image.getDownloadURL();
+                let shortURL = await shortenURL(dwnldURL);
                 
-            }
+                // This is the new object containing title and url
+                let object = {title: title, url: shortURL};
+                    
+                // Appending the new array to the old state
+                state = [...state, object];
+                    
+                // Sorting the array
+                state = state.sort( (a, b) => (a.title > b.title) ? -1 : 1 );
+                    
+            })); 
             
-        }).catch( error => {
-          // Handle any errors
-          setStatus('Red');
-          setStatusMessage('There was an error. Please, try it again.');
-        });
-        
+            // Setting new state and showing screenshots
+            setItems(state);
+            setShowScreenshots(true);
+        }
     }
     
     const shortenURL = async (longURL) => {
@@ -186,13 +177,13 @@ function App() {
         <div className = 'Header'>
             <div className = 'Dummy'>
             </div>
-            <div className = 'Title' onClick = { () => setReady(null) }>Kaptura</div>
+            <div className = 'Title' onClick = { () => setShowScreenshots(false) }>Kaptura</div>
             <div className = 'History'>
                 <svg onClick = { () => displayCaptures(userID) }xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8z"/></svg>
             </div>
         </div>
         <div className = 'Box'>
-        { !ready 
+        { !showScreenshots 
         ? <div className = 'Waiting'>
             <img src = {mainLogo}></img>
             <p>Press</p>
@@ -202,7 +193,8 @@ function App() {
           </div>
         : <div className = 'Completed'>
             <h2>Last screenshots</h2>
-            { items && items.map( (item, key) => 
+            { showScreenshots === 'Loading' && <Loading/>}
+            { showScreenshots !== 'Loading' && items && items.map( (item, key) => 
                 <div className = 'File' key = {key}>
                     <img src = {item.url}></img>
                     <div className = 'Title-Description'>
