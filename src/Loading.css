@@ -1,0 +1,24 @@
+.Loading{
+    display: flex;
+    flex: 1;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+.Loading-Wrap{
+    display: flex;
+    justify-content: center;
+}
+.Loader{
+    border: 5px solid var(--secondaryFontColor);
+    border-radius: 50%;
+    border-top: 5px solid var(--primaryFontColor);
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% {   transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
