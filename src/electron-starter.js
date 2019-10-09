@@ -56,7 +56,7 @@ const createWindow = () => {
         titleBarStyle: 'customButtonsOnHover',
         show: false,
         width: 300, 
-        height: 300,
+        height: 600,
         webPreferences: {
             webSecurity: false,
             nodeIntegration: true,
@@ -89,6 +89,9 @@ const createWindow = () => {
         // when you should delete the corresponding element.
         mainWindow = null
     })
+    
+    // Sending computer id after loading
+    mainWindow.webContents.on('did-finish-load', () => mainWindow.webContents.send('uid', uid) );
     
 }
 
@@ -131,11 +134,11 @@ app.on('ready', () => {
         const formatedPath = userDataPath.replace(" ", "' '");
                 
         shell.exec("screencapture " + formatedPath + "/electron_pic.png", () => {
-                        
+            
             let image = nativeImage.createFromPath(userDataPath + "/electron_pic.png").toPNG();
             
             // Sending image and machine id
-            mainWindow.webContents.send('ping', [image, uid]);
+            mainWindow.webContents.send('ping', image);
             
         });
     });
@@ -148,11 +151,11 @@ app.on('ready', () => {
         const formatedPath = userDataPath.replace(" ", "' '");
                 
         shell.exec("screencapture -i " + formatedPath + "/electron_pic.png", () => {
-                        
+                
             let image = nativeImage.createFromPath(userDataPath + "/electron_pic.png").toPNG();
             
             // Sending image and machine id
-            mainWindow.webContents.send('ping', [image, uid]);
+            mainWindow.webContents.send('ping', image);
             
         });
     }); 
