@@ -4,6 +4,7 @@ import ReactTimeAgo                     from 'react-time-ago';
 import JavascriptTimeAgo                from 'javascript-time-ago';
 import en                               from 'javascript-time-ago/locale/en';
 import mainLogo                         from './mainLogo.png';
+import dogHome                          from './dogHome.png';
 import firebase                         from 'firebase';
 import './App.css';
 
@@ -34,30 +35,39 @@ function App() {
         
     useEffect( () => {
         
-        // Waiting for status changes
-        window.ipcRenderer.on('status', (event, mode) => {
-            
-            if(mode === 'on'){ 
-                window.ipcRenderer.removeListener('ping');
-                setStatus('Green'); 
-                setStatusMessage('Ready to capture'); 
-            }
-            if(mode === 'off'){
-                window.ipcRenderer.removeListener('ping');
-                setStatus('Yellow'); 
-                setStatusMessage('Uploads are paused: please, turn on Kaptura...');
-            }
-            
-        });
-        
-        // Waiting for uid
+        // First render, app waits for user id
+        // After getting uid a listener is added to upload captures
         window.ipcRenderer.on('uid', (event, uid) => {
                 
             // Waiting until user make screencapture
-            window.ipcRenderer.on('ping', (event, pic) => { console.log(status) });
+            window.ipcRenderer.on('ping', (event, pic) => { uploadCapture(pic, uid) });
             
              // Setting uid as new state
             setUserID(uid);
+            
+        });
+        
+        // A stats listener is also launched 
+        // Waiting for status changes = 'on' or 'off'
+        window.ipcRenderer.on('status', (event, mode) => {
+            
+            // First, old listeners need to be removed
+            window.ipcRenderer.removeAllListeners('ping');
+                
+            // If mode is 'on', application waits for captures
+            if(mode === 'on'){ 
+                window.ipcRenderer.on('ping', (event, pic) => { uploadCapture(pic, userID) });
+                setStatus('Green'); 
+                setStatusMessage('Ready to capture'); 
+                setMode('on');
+            }
+            
+            // If mode is 'off', application don't upload captures and shows messages
+            if(mode === 'off'){
+                setStatus('Yellow'); 
+                setStatusMessage('Uploads are paused: please, turn on Kaptura.');
+                setMode('off');
+            }
             
         });
             
@@ -201,11 +211,20 @@ function App() {
         <div className = 'Box'>
         { !showScreenshots 
         ? <div className = 'Waiting'>
-            <img src = {mainLogo}></img>
-            <p>Press</p>
-            <p><kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>3</kbd></p>
-            <p>or</p>
-            <p><kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>4</kbd></p>
+          { mode === 'on'
+          ? <>
+                <img src = {mainLogo}></img>
+                <p>Press</p>
+                <p><kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>3</kbd></p>
+                <p>or</p>
+                <p><kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>4</kbd></p>
+            </>
+          : <>
+                <img src = {dogHome}></img>
+                <p>Woooof! I am sleeping...</p> 
+                <p>Call me when you need me...</p>
+            </>
+          }   
           </div>
         : <div className = 'Completed'>
             <h2>Last screenshots</h2>

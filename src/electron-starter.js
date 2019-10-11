@@ -98,7 +98,7 @@ const createWindow = () => {
     setPosition();
     
     // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
     
     // Blur window when close o loses focus
     mainWindow.on('blur', () => mainWindow.hide() );
