@@ -26,6 +26,7 @@ function App() {
     
     const [items, setItems] = useState([]);
     const [imgName, setImgName] = useState(null);
+    const [mode, setMode] = useState('on');
     const [showScreenshots, setShowScreenshots] = useState(null);
     const [status, setStatus] = useState('Green');
     const [statusMessage, setStatusMessage] = useState('Ready to capture');
@@ -33,11 +34,27 @@ function App() {
         
     useEffect( () => {
         
+        // Waiting for status changes
+        window.ipcRenderer.on('status', (event, mode) => {
+            
+            if(mode === 'on'){ 
+                window.ipcRenderer.removeListener('ping');
+                setStatus('Green'); 
+                setStatusMessage('Ready to capture'); 
+            }
+            if(mode === 'off'){
+                window.ipcRenderer.removeListener('ping');
+                setStatus('Yellow'); 
+                setStatusMessage('Uploads are paused: please, turn on Kaptura...');
+            }
+            
+        });
+        
         // Waiting for uid
         window.ipcRenderer.on('uid', (event, uid) => {
                 
             // Waiting until user make screencapture
-            window.ipcRenderer.on('ping', (event, pic) => { uploadCapture(pic, uid) });
+            window.ipcRenderer.on('ping', (event, pic) => { console.log(status) });
             
              // Setting uid as new state
             setUserID(uid);
@@ -78,27 +95,26 @@ function App() {
             setStatus('Red');
             setStatusMessage('There was an error. Please, try it again.');
 
-        }, () => {
+        }, async () => {
 
-            task.snapshot.ref.getDownloadURL().then( downloadURL => {
+            // Getting donwloadURL
+            let downloadURL = await task.snapshot.ref.getDownloadURL();
 
-                // Setting status of variables
-                setStatus('Green');
-                setStatusMessage('Ready to capture: press (⌘ + ⇧ + 3) or (⌘ + ⇧ + 4)');
-                setImgName('kapture' + timeStamp + '.png');
+            // Shorten URL and    
+            let shortURL = await shortenURL(downloadURL);
+            
+             // Writing uRL in clipboard
+            window.clipboard.writeText(shortURL)
 
-                // Shorten URL and    
-                // Writing uRL in clipboard
-                shortenURL(downloadURL).then( shortURL => window.clipboard.writeText(shortURL) );
-
-                // Sending notification
-                new Notification('Woof-woof!', {
-                    body: 'Screencapture URL was copied to your clipboard' 
-                });
-
-                displayCaptures(uid);
-
-            });
+            // Sending notification
+            new Notification('Woof-woof!', { body: 'Screencapture URL was copied to your clipboard' });
+            
+            // Setting status of variables
+            setStatus('Green');
+            setStatusMessage('Ready to capture');
+            
+            // Display all captures
+            displayCaptures(uid);
 
         });
         

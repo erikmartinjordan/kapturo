@@ -1,6 +1,7 @@
 const nodeMachineId = require('node-machine-id');
 const electron = require('electron');
 const app = electron.app;
+const Menu = electron.Menu;
 const BrowserWindow = electron.BrowserWindow;
 const nativeImage = electron.nativeImage;
 const Tray = electron.Tray;
@@ -31,6 +32,26 @@ const createTray = () => {
     
     // Ingroirng double clicks to make app faster
     tray.setIgnoreDoubleClickEvents(true);
+    
+    // Context Menu
+    const contextMenu = Menu.buildFromTemplate([
+        { label: 'About Kaptura',   role: 'about' },
+        { label: 'Separator',       type: 'separator'},
+        { label: 'Status',          
+            submenu: [
+                {label: 'On',  type: 'radio', checked: true,  click: () => mainWindow.webContents.send('status', 'on')  }, 
+                {label: 'Off', type: 'radio', checked: false, click: () => mainWindow.webContents.send('status', 'off') }
+            ]
+        },
+        { label: 'Separator',       type: 'separator'},
+        { label: 'Quit Kaptura',    role: 'quit' },
+    ]);
+    
+    // Setting tooltip
+    tray.setToolTip('Woooooof!');
+    
+    // Setting context Menu 
+    tray.on('right-click', (event) => tray.popUpContextMenu(contextMenu));
     
     // Add a click handler so that when the user clicks on the menubar icon, it shows
     // our popup window
