@@ -4,7 +4,7 @@ import ReactTimeAgo                     from 'react-time-ago';
 import JavascriptTimeAgo                from 'javascript-time-ago';
 import en                               from 'javascript-time-ago/locale/en';
 import mainLogo                         from './mainLogo.png';
-import dogHome                          from './dogHome.png';
+import mainLogoPaused                   from './mainLogoPaused.png';
 import firebase                         from 'firebase';
 import './App.css';
 
@@ -181,7 +181,7 @@ function App() {
         
         let url = 'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyB1caNJEEBjbz944Rlf9hZMTyyH5GHypLU';
         
-        let longDynamicLink = 'https://kaptura.page.link/?link=' + encodeURIComponent(longURL);
+        let longDynamicLink = 'https://kapturo.page.link/?link=' + encodeURIComponent(longURL);
         
         let response = await fetch(url, {
           "method": "POST",
@@ -203,9 +203,9 @@ function App() {
         <div className = 'Header'>
             <div className = 'Dummy'>
             </div>
-            <div className = 'Title' onClick = { () => setShowScreenshots(false) }>Kaptura</div>
+            <div className = 'Title' onClick = { () => setShowScreenshots(false) }>Kapturo</div>
             <div className = 'History'>
-                <svg onClick = { () => displayCaptures(userID) }xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8z"/></svg>
+                <svg onClick = { () => displayCaptures(userID) }xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path fill = "white" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8z"/></svg>
             </div>
         </div>
         <div className = 'Box'>
@@ -220,9 +220,9 @@ function App() {
                 <p><kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>4</kbd></p>
             </>
           : <>
-                <img src = {dogHome}></img>
-                <p>Woooof! I am sleeping...</p> 
-                <p>Call me when you need me...</p>
+                <img src = {mainLogoPaused}></img>
+                <p>Kapture is paused.</p> 
+                <p>Turn it on to save captures again.</p>
             </>
           }   
           </div>
