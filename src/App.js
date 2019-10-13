@@ -117,7 +117,7 @@ function App() {
             window.clipboard.writeText(shortURL)
 
             // Sending notification
-            new Notification('Woof-woof!', { body: 'Screencapture URL was copied to your clipboard' });
+            new Notification('Kapturo', { body: 'Screencapture URL was copied to your clipboard' });
             
             // Setting status of variables
             setStatus('Green');
