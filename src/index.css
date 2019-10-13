@@ -15,6 +15,7 @@ body {
     sans-serif;
 }
 kbd{
+    color: var(--bgSecondaryColor);
     display: inline-block;
     margin: 0 .1em;
     padding: .1em .6em;
@@ -29,8 +30,8 @@ kbd{
     white-space: nowrap;
 }
 :root{
-    --bgPrimaryColor: white;
-    --bgSecondaryColor: #f6f7f8;
-    --primaryFontColor: #30363b;
+    --bgPrimaryColor: #30363b;
+    --bgSecondaryColor: #262b2f;
+    --primaryFontColor: white;
     --secondaryFontColor: #9ba1a6;
 }
