@@ -35,7 +35,7 @@ const createTray = () => {
     
     // Context Menu
     const contextMenu = Menu.buildFromTemplate([
-        { label: 'About Kaptura',   role: 'about' },
+        { label: 'About Kapturo',   role: 'about' },
         { label: 'Separator',       type: 'separator'},
         { label: 'Status',          
             submenu: [
@@ -44,11 +44,11 @@ const createTray = () => {
             ]
         },
         { label: 'Separator',       type: 'separator'},
-        { label: 'Quit Kaptura',    role: 'quit' },
+        { label: 'Quit Kapturo',    role: 'quit' },
     ]);
     
     // Setting tooltip
-    tray.setToolTip('Woooooof!');
+    tray.setToolTip('Kapturo');
     
     // Setting context Menu 
     tray.on('right-click', (event) => tray.popUpContextMenu(contextMenu));
@@ -136,7 +136,7 @@ const setPosition = () => {
 }
 
 // Don't show app in the dock
-// app.dock.hide();
+app.dock.hide();
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
