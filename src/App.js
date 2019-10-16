@@ -196,6 +196,13 @@ function App() {
         return data.shortLink;
         
     }
+    
+    const copyURL = (url) => {
+        
+        window.clipboard.writeText(url);
+        new Notification('Kapturo', { body: url + ' copied!' });
+        
+    }
         
     return (
     <div className = 'App'>
@@ -235,7 +242,9 @@ function App() {
                     <div className = 'Title-Description'>
                         <div className = 'Title'><ReactTimeAgo date = {item.title}/></div>
                         <div className = 'Description'>{item.url}</div>
-                    </div>   
+                    </div>
+                    <div className = 'Copy' 
+                         onClick = { () => copyURL(item.url) }>Copy URL</div>
                 </div>)
             }
           </div>

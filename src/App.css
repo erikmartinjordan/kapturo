@@ -82,6 +82,9 @@
     display: flex;
     margin-bottom: 20px;
 }
+.Box .Completed .File:hover .Copy{
+    display: block;
+}
 .Box .Completed .Title-Description{
     display: flex;
     flex-direction: column; 
@@ -106,6 +109,15 @@
     margin-right: 5px;
     object-fit: cover;
     width: 50px;
+}
+.Box .Completed .Copy{
+    border: 1px solid var(--secondaryFontColor);
+    border-radius: 5px;
+    cursor: pointer;
+    display: none;
+    font-size: xx-small;
+    min-width: 50px;
+    padding: 2px;
 }
 .Box p{
     font-size: small;
