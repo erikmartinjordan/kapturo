@@ -43,6 +43,12 @@ const createTray = () => {
                 {label: 'Off', type: 'radio', checked: false, click: () => mainWindow.webContents.send('status', 'off') }
             ]
         },
+        { label: 'Type of links',
+            submenu:[
+                {label: 'Short', type: 'radio', checked: true, click: () => mainWindow.webContents.send('links', 'short') },
+                {label: 'Long', type: 'radio', checked: false, click: () => mainWindow.webContents.send('links', 'long') }, 
+            ]
+        },
         { label: 'Separator',       type: 'separator'},
         { label: 'Quit Kapturo',    role: 'quit' },
     ]);
@@ -98,7 +104,7 @@ const createWindow = () => {
     setPosition();
     
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     
     // Blur window when close o loses focus
     mainWindow.on('blur', () => mainWindow.hide() );
