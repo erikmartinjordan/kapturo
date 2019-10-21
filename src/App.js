@@ -31,6 +31,7 @@ function App() {
     const [showScreenshots, setShowScreenshots] = useState(null);
     const [status, setStatus] = useState('Green');
     const [statusMessage, setStatusMessage] = useState('Ready to capture');
+    const [typeOfURL, setTypeOfURL] = useState('short');
     const [userID, setUserID] = useState(null);
         
     useEffect( () => {
@@ -38,42 +39,65 @@ function App() {
         // First render, app waits for user id
         // After getting uid a listener is added to upload captures
         window.ipcRenderer.on('uid', (event, uid) => {
+            
+            // Setting user ID
+            setUserID(uid);
                 
             // Waiting until user make screencapture
-            window.ipcRenderer.on('ping', (event, pic) => { uploadCapture(pic, uid) });
+            window.ipcRenderer.on('ping', (event, pic) => { uploadCapture(pic, uid, 'short') });
             
-             // Setting uid as new state
-            setUserID(uid);
+            // A stats listener is also launched 
+            // Waiting for status changes = 'on' or 'off'
+            window.ipcRenderer.on('status', (event, mode) => {
             
-        });
-        
-        // A stats listener is also launched 
-        // Waiting for status changes = 'on' or 'off'
-        window.ipcRenderer.on('status', (event, mode) => {
+                // First, old listeners need to be removed
+                window.ipcRenderer.removeAllListeners('ping');
+
+                // If mode is 'on', application waits for captures
+                if(mode === 'on'){ 
+                    window.ipcRenderer.on('ping', (event, pic) => { uploadCapture(pic, uid, 'short') });
+                    setStatus('Green'); 
+                    setStatusMessage('Ready to capture'); 
+                    setMode('on');
+                }
+
+                // If mode is 'off', application don't upload captures and shows messages
+                if(mode === 'off'){
+                    setStatus('Yellow'); 
+                    setStatusMessage('Uploads are paused: please, turn on Kaptura.');
+                    setMode('off');
+                }
             
-            // First, old listeners need to be removed
-            window.ipcRenderer.removeAllListeners('ping');
-                
-            // If mode is 'on', application waits for captures
-            if(mode === 'on'){ 
-                window.ipcRenderer.on('ping', (event, pic) => { uploadCapture(pic, userID) });
-                setStatus('Green'); 
-                setStatusMessage('Ready to capture'); 
-                setMode('on');
-            }
+            });
             
-            // If mode is 'off', application don't upload captures and shows messages
-            if(mode === 'off'){
-                setStatus('Yellow'); 
-                setStatusMessage('Uploads are paused: please, turn on Kaptura.');
-                setMode('off');
-            }
+            // A type of links listener is also launched 
+            // Waiting for type of link = 'long' or 'short'
+            window.ipcRenderer.on('links', (event, mode) => {
+            
+                // First, old listeners need to be removed
+                window.ipcRenderer.removeAllListeners('ping');
+
+                // If mode is 'on', application waits for captures
+                if(mode === 'short'){ 
+                    window.ipcRenderer.on('ping', (event, pic) => { uploadCapture(pic, uid, 'short') });
+                    setTypeOfURL('short');
+                    displayCaptures(uid, 'short');
+                }
+
+                // If mode is 'off', application don't upload captures and shows messages
+                if(mode === 'long'){
+                    window.ipcRenderer.on('ping', (event, pic) => { uploadCapture(pic, uid, 'long') });
+                    setTypeOfURL('long');
+                    displayCaptures(uid, 'long');
+                }
+            
+            });
             
         });
             
     }, []);
     
-    const uploadCapture = (pic, uid) => {
+    const uploadCapture = (pic, uid, typeOfLink) => {
         
         // Getting the image
         var blob = new Blob([pic], {type: 'image/png'});
@@ -111,10 +135,10 @@ function App() {
             let downloadURL = await task.snapshot.ref.getDownloadURL();
 
             // Shorten URL and    
-            let shortURL = await shortenURL(downloadURL);
+            let clipboardURL = typeOfLink === 'short' ? await shortenURL(downloadURL) : downloadURL;
             
              // Writing uRL in clipboard
-            window.clipboard.writeText(shortURL)
+            window.clipboard.writeText(clipboardURL)
 
             // Sending notification
             new Notification('Kapturo', { body: 'Screencapture URL was copied to your clipboard' });
@@ -131,7 +155,7 @@ function App() {
         
     }
     
-    const displayCaptures = async (uid) => {
+    const displayCaptures = async (uid, typeOfLinks) => {
         
          // First state: loading
         setShowScreenshots('Loading');
@@ -157,11 +181,11 @@ function App() {
                 let title = parseInt( (image.name).slice(0, -4) );
                 
                 // Getting downloadURL
-                let dwnldURL = await image.getDownloadURL();
-                let shortURL = await shortenURL(dwnldURL);
-                
+                let downloadURL  = await image.getDownloadURL();
+                let clipboardURL = (typeOfLinks === 'short') ? await shortenURL(downloadURL) : downloadURL;
+                    
                 // This is the new object containing title and url
-                let object = {title: title, url: shortURL};
+                let object = {title: title, url: clipboardURL};
                     
                 // Appending the new array to the old state
                 state = [...state, object];
@@ -181,7 +205,7 @@ function App() {
         
         let url = 'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyB1caNJEEBjbz944Rlf9hZMTyyH5GHypLU';
         
-        let longDynamicLink = 'https://kapturo.page.link/?link=' + encodeURIComponent(longURL);
+        let longDynamicLink = 'https://kapturo.app/screencap/?link=' + encodeURIComponent(longURL);
         
         let response = await fetch(url, {
           "method": "POST",
@@ -212,7 +236,7 @@ function App() {
             </div>
             <div className = 'Title' onClick = { () => setShowScreenshots(false) }>Kapturo</div>
             <div className = 'History'>
-                <svg onClick = { () => displayCaptures(userID) }xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path fill = "white" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8z"/></svg>
+                <svg onClick = { () => displayCaptures(userID, typeOfURL) }xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path fill = "white" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8z"/></svg>
             </div>
         </div>
         <div className = 'Box'>
