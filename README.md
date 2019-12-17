@@ -10,8 +10,10 @@ Kapturo uploads a screencapture to a server and returns a URL to the clipboard.
 
 You can choose between:
 
-1. Long  URL's: https://firebasestorage.googleapis.com/v0/b/autosnapshoturl.appspot.com/o/ + URL of the img + token
-2. Short URL's: https://kapturo.app/screencap/ + URL of the img
+1. Long  URL's: 
+https://firebasestorage.googleapis.com/v0/b/autosnapshoturl.appspot.com/o/ + URL of the img + token
+2. Short URL's: 
+https://kapturo.app/screencap/ + URL of the img
 
 Example of a random screencapture: 
 
